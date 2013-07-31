@@ -1,6 +1,5 @@
-princemaple.github.io
-=====================
+## io
 
-github page?
+### Get some stuff going
 
-pure testing
+1. CSP game model

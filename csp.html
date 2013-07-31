@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Jump</title>
+	<style>
+		#wrapper{
+			width: 630px;
+			margin: auto;
+		}
+		#cav{
+			width: 630px;
+			height: 630px;
+		}
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<canvas id="cav"></canvas>
+	</div>
+	<script>
+		"use strict";
+		var cav = document.getElementById( "cav" );
+		cav.width = 630;
+		cav.height = 630;
+
+		// canvas position
+		var LEFT = cav.offsetLeft;
+		var TOP = cav.offsetTop;
+
+		var ctx = cav.getContext( "2d" );
+
+		/* Jump Control */
+		var Jump = false;
+		var currentRow = -1;
+		var currentCol = -1;
+		/****************/
+
+		var Board = {
+			BOARD_EDGE: 630,
+
+			boardSize: 6,
+			pieceRadius: 50,
+			gapSize: 0,
+			turn: true,
+			squares: [],
+
+			init: function init( size ){
+				// value init
+				this.boardSize = size || this.boardSize;
+				this.gapSize = this.BOARD_EDGE / this.boardSize >> 0;
+				this.squares = [];
+				for( var c = 0; c < this.boardSize; ++c ){
+					this.squares.push( [] );
+					var row = this.squares[c];
+					for( var d = 0; d < this.boardSize; ++d ){
+						row.push( 0 );
+					}
+				}
+
+				// draw background
+				this.drawBG( this.boardSize );
+			},
+
+			drawBG: function drawBG(){
+				ctx.fillStyle = "#555";
+				ctx.fillRect( 0, 0, 630, 630 );
+
+				ctx.strokeStyle = "#fff";
+				for( var c = 1; c < this.boardSize; ++c ){
+					// vertical lines
+					ctx.beginPath();
+					ctx.moveTo( this.gapSize * c, 0 );
+					ctx.lineTo( this.gapSize * c, this.BOARD_EDGE );
+					ctx.closePath();
+					ctx.stroke();
+
+					// horizontal lines
+					ctx.beginPath();
+					ctx.moveTo( 0, this.gapSize * c );
+					ctx.lineTo( this.BOARD_EDGE, this.gapSize * c );
+					ctx.closePath();
+					ctx.stroke();
+				}
+			},
+
+			place: function place(cellRow, cellCol){
+				var t = this;
+				var rx = cellCol * t.gapSize + ( t.gapSize / 2 >> 0 );
+				var ry = cellRow * t.gapSize + ( t.gapSize / 2 >> 0 );
+
+				ctx.fillStyle = ( this.turn > 0 )?"#fff":"#000";
+				this.squares[cellRow][cellCol] = this.turn;
+				ctx.arc( rx, ry, t.pieceRadius, Math.PI * 2, false );
+				ctx.fill();
+			},
+
+			jump: function jump(cellRow, cellCol){
+				this.place(cellRow, cellCol);
+				this.cover((cellRow + currentRow) / 2, (cellCol + currentCol) / 2);
+				currentRow = cellRow;
+				currentCol = cellCol;
+			},
+
+			cover: function cover(cellRow, cellCol){
+				var rx = cellCol * this.gapSize;
+				var ry = cellRow * this.gapSize;
+				console.log(rx);
+				console.log(ry);
+				ctx.fillStyle = "rgba(200, 80, 40, 0.5)";
+				ctx.fillRect(rx, ry, this.gapSize, this.gapSize);
+			},
+
+			landPiece: function landPiece( x, y ){
+				ctx.beginPath();
+				var t = this;
+				var cellCol = x / t.gapSize >> 0;
+				var cellRow = y / t.gapSize >> 0;
+
+				if( !this.squares[cellRow][cellCol] && !Jump ){
+					this.place(cellRow, cellCol);
+					Board.turn = -Board.turn;
+					console.log(1);
+				}else if(Jump && !this.squares[cellRow][cellCol] &&
+								this.canJump(cellRow, cellCol, currentRow, currentCol)){
+						this.jump(cellRow, cellCol);
+						console.log(2);
+				}else if(this.squares[cellRow][cellCol]){
+					if(!Jump && this.squares[cellRow][cellCol] == this.turn){
+						Jump = true;
+						currentRow = cellRow;
+						currentCol = cellCol;
+						console.log(3);
+					}else{
+						Jump = false;
+						if(this.squares[cellRow][cellCol] == this.turn){
+							Board.turn = -Board.turn;
+						}
+						console.log(4);
+					}
+				}
+			},
+
+			canJump: function canJump(p1row, p1col, p2row, p2col){
+				return ((Math.abs(p1row - p2row) == 2 &&
+					(Math.abs(p1col - p2col) == 0 || Math.abs(p1col - p2col) == 2))
+					|| (Math.abs(p1col - p2col) == 2 &&
+					(Math.abs(p1row - p2row) == 0 || Math.abs(p1row - p2row) == 2)))
+					&& this.squares[(p1row + p2row) / 2][(p1col + p2col) / 2];
+			}
+
+		}
+
+		Board.init();
+
+		cav.addEventListener( "click", function( e ){
+			Board.landPiece( e.pageX - LEFT, e.pageY - TOP );
+			// console.log("clicked");
+		} );
+
+	</script>
+</body>
+</html>
