@@ -32,6 +32,7 @@
 
 		/* Jump Control */
 		var Jump = false;
+		var commitedJump = false;
 		var currentRow = -1;
 		var currentCol = -1;
 		/****************/
@@ -105,8 +106,7 @@
 			cover: function cover(cellRow, cellCol){
 				var rx = cellCol * this.gapSize;
 				var ry = cellRow * this.gapSize;
-				console.log(rx);
-				console.log(ry);
+				this.squares[cellRow][cellCol] = 2;
 				ctx.fillStyle = "rgba(200, 80, 40, 0.5)";
 				ctx.fillRect(rx, ry, this.gapSize, this.gapSize);
 			},
@@ -124,6 +124,7 @@
 				}else if(Jump && !this.squares[cellRow][cellCol] &&
 								this.canJump(cellRow, cellCol, currentRow, currentCol)){
 						this.jump(cellRow, cellCol);
+						commitedJump = true;
 						console.log(2);
 				}else if(this.squares[cellRow][cellCol]){
 					if(!Jump && this.squares[cellRow][cellCol] == this.turn){
@@ -133,8 +134,9 @@
 						console.log(3);
 					}else{
 						Jump = false;
-						if(this.squares[cellRow][cellCol] == this.turn){
+						if(this.squares[cellRow][cellCol] == this.turn && commitedJump){
 							Board.turn = -Board.turn;
+							commitedJump = false;
 						}
 						console.log(4);
 					}
@@ -146,7 +148,9 @@
 					(Math.abs(p1col - p2col) == 0 || Math.abs(p1col - p2col) == 2))
 					|| (Math.abs(p1col - p2col) == 2 &&
 					(Math.abs(p1row - p2row) == 0 || Math.abs(p1row - p2row) == 2)))
-					&& this.squares[(p1row + p2row) / 2][(p1col + p2col) / 2];
+					&& Math.abs(
+						this.squares[(p1row + p2row) / 2][(p1col + p2col) / 2]
+					) == 1;
 			}
 
 		}
