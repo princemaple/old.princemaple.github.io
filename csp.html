@@ -7,6 +7,7 @@
 		#wrapper{
 			width: 630px;
 			margin: auto;
+			font-family: sans-serif;
 		}
 		#cav{
 			width: 630px;
@@ -30,11 +31,23 @@
 			background-color: #eee;
 			cursor: pointer;
 		}
+		.chrome{
+			color: blue;
+		}
 	</style>
 </head>
 <body>
 	<div id="wrapper">
 		<canvas id="cav"></canvas>
+		<script>
+			var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+			if(isChrome){
+				document.write("<p>Surprisingly, something I used here isn't supported by <span class=\"chrome\">Chrome</span>. <br>[display:flex and Array.map]</p>")
+				document.write("<p>Good thing is the game is fine in both Firefox and <span class=\"chrome\">Chrome</span>.</p>")
+				document.write("<p>It's just the size picker you can't use</p>")
+				document.write("<p>You can type: Board.init(n) in your console to change the size, where [n] is your size. Or leave out the [n] to restart with the same size.</p>")
+			}
+		</script>
 		<section id="picker">
 			<header>Size:</header>
 			<div id="n2" class="picker">2</div>
