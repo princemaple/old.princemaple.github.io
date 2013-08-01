@@ -12,11 +12,39 @@
 			width: 630px;
 			height: 630px;
 		}
+		#picker{
+			text-align: center;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		#picker header{
+			flex: 3;
+			margin-right: 20px;
+			font-size: 2em;
+		}
+		.picker{
+			flex: 1;
+			padding: 10px;
+			margin-left: 10px;
+			background-color: #eee;
+		}
 	</style>
 </head>
 <body>
 	<div id="wrapper">
 		<canvas id="cav"></canvas>
+		<section id="picker">
+			<header>Size:</header>
+			<div id="n2" class="picker">2</div>
+			<div id="n3" class="picker">3</div>
+			<div id="n4" class="picker">4</div>
+			<div id="n5" class="picker">5</div>
+			<div id="n6" class="picker">6</div>
+			<div id="n7" class="picker">7</div>
+			<div id="n8" class="picker">8</div>
+			<div id="n9" class="picker">9</div>
+		</section>
 	</div>
 	<script>
 		"use strict";
@@ -43,7 +71,7 @@
 			boardSize: 6,
 			pieceRadius: 50,
 			gapSize: 0,
-			turn: true,
+			turn: 1,
 			squares: [],
 
 			init: function init( size ){
@@ -51,6 +79,7 @@
 				this.boardSize = size || this.boardSize;
 				this.gapSize = this.BOARD_EDGE / this.boardSize >> 0;
 				this.squares = [];
+
 				for( var c = 0; c < this.boardSize; ++c ){
 					this.squares.push( [] );
 					var row = this.squares[c];
@@ -60,7 +89,7 @@
 				}
 
 				// draw background
-				this.drawBG( this.boardSize );
+				this.drawBG();
 			},
 
 			drawBG: function drawBG(){
@@ -85,7 +114,7 @@
 				}
 			},
 
-			place: function place(cellRow, cellCol){
+			place: function place( cellRow, cellCol ){
 				var t = this;
 				var rx = cellCol * t.gapSize + ( t.gapSize / 2 >> 0 );
 				var ry = cellRow * t.gapSize + ( t.gapSize / 2 >> 0 );
@@ -96,19 +125,23 @@
 				ctx.fill();
 			},
 
-			jump: function jump(cellRow, cellCol){
-				this.place(cellRow, cellCol);
-				this.cover((cellRow + currentRow) / 2, (cellCol + currentCol) / 2);
+			jump: function jump( cellRow, cellCol ){
+				this.place( cellRow, cellCol );
+				var midRow = ( cellRow + currentRow ) / 2;
+				var midCol = ( cellCol + currentCol ) / 2;
+				if( this.turn != this.squares[midRow][midCol] ){
+					this.kill( midRow, midCol );
+				}
 				currentRow = cellRow;
 				currentCol = cellCol;
 			},
 
-			cover: function cover(cellRow, cellCol){
+			kill: function kill( cellRow, cellCol ){
 				var rx = cellCol * this.gapSize;
 				var ry = cellRow * this.gapSize;
 				this.squares[cellRow][cellCol] = 2;
 				ctx.fillStyle = "rgba(200, 80, 40, 0.5)";
-				ctx.fillRect(rx, ry, this.gapSize, this.gapSize);
+				ctx.fillRect( rx, ry, this.gapSize, this.gapSize );
 			},
 
 			landPiece: function landPiece( x, y ){
@@ -118,49 +151,81 @@
 				var cellRow = y / t.gapSize >> 0;
 
 				if( !this.squares[cellRow][cellCol] && !Jump ){
-					this.place(cellRow, cellCol);
+					this.place( cellRow, cellCol );
 					Board.turn = -Board.turn;
-					console.log(1);
-				}else if(Jump && !this.squares[cellRow][cellCol] &&
-								this.canJump(cellRow, cellCol, currentRow, currentCol)){
-						this.jump(cellRow, cellCol);
+					console.log( 1 );
+				}else if( Jump && !this.squares[cellRow][cellCol] &&
+								this.canJump( cellRow, cellCol, currentRow, currentCol ) ){
+						this.jump( cellRow, cellCol );
 						commitedJump = true;
-						console.log(2);
-				}else if(this.squares[cellRow][cellCol]){
-					if(!Jump && this.squares[cellRow][cellCol] == this.turn){
-						Jump = true;
-						currentRow = cellRow;
-						currentCol = cellCol;
-						console.log(3);
-					}else{
-						Jump = false;
-						if(this.squares[cellRow][cellCol] == this.turn && commitedJump){
-							Board.turn = -Board.turn;
-							commitedJump = false;
-						}
-						console.log(4);
+						console.log( 2 );
+				}else if( !Jump && this.squares[cellRow][cellCol] == this.turn ){
+					Jump = true;
+					currentRow = cellRow;
+					currentCol = cellCol;
+					console.log( 3 );
+				}else{
+					Jump = false;
+					if( commitedJump ){
+						Board.turn = -Board.turn;
+						commitedJump = false;
 					}
+					console.log( 4 );
 				}
+				this.checkWin();
 			},
 
-			canJump: function canJump(p1row, p1col, p2row, p2col){
-				return ((Math.abs(p1row - p2row) == 2 &&
-					(Math.abs(p1col - p2col) == 0 || Math.abs(p1col - p2col) == 2))
-					|| (Math.abs(p1col - p2col) == 2 &&
-					(Math.abs(p1row - p2row) == 0 || Math.abs(p1row - p2row) == 2)))
+			canJump: function canJump( p1row, p1col, p2row, p2col ){
+				return ( ( Math.abs( p1row - p2row ) == 2 &&
+					( Math.abs( p1col - p2col ) == 0 || Math.abs( p1col - p2col ) == 2 ) )
+					|| ( Math.abs( p1col - p2col ) == 2 &&
+					( Math.abs( p1row - p2row ) == 0 || Math.abs( p1row - p2row ) == 2 ) ) )
 					&& Math.abs(
-						this.squares[(p1row + p2row) / 2][(p1col + p2col) / 2]
+						this.squares[( p1row + p2row ) / 2][( p1col + p2col ) / 2]
 					) == 1;
-			}
+			},
 
+			checkWin: function checkWin(){
+				var filled = this.squares.every(function(o){
+					return o.every(Boolean);
+				});
+
+				if(filled){
+					var winCount = 0;
+					for(var row in this.squares){
+						for(var col in this.squares[row]){
+							if(Math.abs(this.squares[row][col]) == 1){
+								winCount += this.squares[row][col];
+								console.log("winner count" + winCount);
+							}
+						}
+					}
+					console.log(this.squares);
+					if(winCount){
+						var which = (winCount > 0)? "White" : "Black";
+						alert(which + " won the game by " + Math.abs(winCount));
+					}else{
+						alert("Tie!");
+					}
+
+					this.init();
+				}
+
+			}
 		}
 
 		Board.init();
 
 		cav.addEventListener( "click", function( e ){
 			Board.landPiece( e.pageX - LEFT, e.pageY - TOP );
-			// console.log("clicked");
 		} );
+
+		var pickers = document.getElementsByClassName("picker");
+		Array.map(pickers, function(picker){
+			picker.addEventListener("click", function(){
+				Board.init(parseInt(picker.innerHTML));
+			});
+		});
 
 	</script>
 </body>
