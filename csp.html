@@ -81,6 +81,7 @@
 				this.gapSize = this.BOARD_EDGE / this.boardSize >> 0;
 				this.squares = [];
 				this.turn = 1;
+				this.pieceRadius = (this.gapSize - 5) / 2 >> 0;
 
 				for( var c = 0; c < this.boardSize; ++c ){
 					this.squares.push( [] );
