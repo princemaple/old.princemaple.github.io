@@ -25,14 +25,21 @@ a:hover{
 body{
 	background-color: #49a;
 	color: #fff;
+	display: -webkit-flex;
 	display: flex;
+	-webkit-justify-content: center;
 	justify-content: center;
+	font-family: sans-serif;
 }
 
 #wrapper{
+	display: -webkit-flex;
 	display: flex;
+	-webkit-justify-content: center;
 	justify-content: center;
+	-webkit-align-items: center;
 	align-items: center;
+	-webkit-flex-direction: column;
 	flex-direction: column;
 	background-color: rgba(33,33,33,0.5);
 	overflow: hidden;

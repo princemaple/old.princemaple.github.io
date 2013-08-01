@@ -15,16 +15,19 @@
 		}
 		#picker{
 			text-align: center;
+			display: -webkit-flex;
 			display: flex;
 			justify-content: center;
 			align-items: center;
 		}
 		#picker header{
+			-webkit-flex: 3;
 			flex: 3;
 			margin-right: 20px;
 			font-size: 2em;
 		}
 		.picker{
+			-webkit-flex: 1;
 			flex: 1;
 			padding: 10px;
 			margin-left: 10px;
@@ -39,15 +42,6 @@
 <body>
 	<div id="wrapper">
 		<canvas id="cav"></canvas>
-		<script>
-			var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-			if(isChrome){
-				document.write("<p>Surprisingly, something I used here isn't supported by <span class=\"chrome\">Chrome</span>. <br>[display:flex and Array.map]</p>")
-				document.write("<p>Good thing is the game is fine in both Firefox and <span class=\"chrome\">Chrome</span>.</p>")
-				document.write("<p>It's just the size picker you can't use</p>")
-				document.write("<p>You can type: Board.init(n) in your console to change the size, where [n] is your size. Or leave out the [n] to restart with the same size.</p>")
-			}
-		</script>
 		<section id="picker">
 			<header>Size:</header>
 			<div id="n2" class="picker">2</div>
@@ -62,6 +56,7 @@
 	</div>
 	<script>
 		"use strict";
+		var isChrome = navigator.userAgent.toLowerCase().indexOf( 'chrome' ) > -1;
 		var cav = document.getElementById( "cav" );
 		cav.width = 630;
 		cav.height = 630;
@@ -94,7 +89,7 @@
 				this.gapSize = this.BOARD_EDGE / this.boardSize >> 0;
 				this.squares = [];
 				this.turn = 1;
-				this.pieceRadius = (this.gapSize - 5) / 2 >> 0;
+				this.pieceRadius = ( this.gapSize - 5 ) / 2 >> 0;
 
 				for( var c = 0; c < this.boardSize; ++c ){
 					this.squares.push( [] );
@@ -169,24 +164,24 @@
 				if( !this.squares[cellRow][cellCol] && !Jump ){
 					this.place( cellRow, cellCol );
 					Board.turn = -Board.turn;
-					console.log( 1 );
+					// console.log( 1 );
 				}else if( Jump && !this.squares[cellRow][cellCol] &&
 								this.canJump( cellRow, cellCol, currentRow, currentCol ) ){
 						this.jump( cellRow, cellCol );
 						commitedJump = true;
-						console.log( 2 );
+						// console.log( 2 );
 				}else if( !Jump && this.squares[cellRow][cellCol] == this.turn ){
 					Jump = true;
 					currentRow = cellRow;
 					currentCol = cellCol;
-					console.log( 3 );
+					// console.log( 3 );
 				}else{
 					Jump = false;
 					if( commitedJump ){
 						Board.turn = -Board.turn;
 						commitedJump = false;
 					}
-					console.log( 4 );
+					// console.log( 4 );
 				}
 				this.checkWin();
 			},
@@ -202,26 +197,26 @@
 			},
 
 			checkWin: function checkWin(){
-				var filled = this.squares.every(function(o){
-					return o.every(Boolean);
+				var filled = this.squares.every( function( o ){
+					return o.every( Boolean );
 				});
 
-				if(filled){
+				if( filled ){
 					var winCount = 0;
-					for(var row in this.squares){
-						for(var col in this.squares[row]){
-							if(Math.abs(this.squares[row][col]) == 1){
+					for( var row in this.squares ){
+						for( var col in this.squares[row] ){
+							if( Math.abs( this.squares[row][col] ) == 1 ){
 								winCount += this.squares[row][col];
-								console.log("winner count" + winCount);
+								// console.log( "winner count" + winCount );
 							}
 						}
 					}
-					console.log(this.squares);
-					if(winCount){
-						var which = (winCount > 0)? "White" : "Black";
-						alert(which + " won the game by " + Math.abs(winCount));
+					console.log( this.squares );
+					if( winCount ){
+						var which = ( winCount > 0 )? "White" : "Black";
+						alert( which + " won the game by " + Math.abs( winCount ) );
 					}else{
-						alert("Tie!");
+						alert( "Tie!" );
 					}
 
 					this.init();
@@ -234,14 +229,23 @@
 
 		cav.addEventListener( "click", function( e ){
 			Board.landPiece( e.pageX - LEFT, e.pageY - TOP );
-		} );
-
-		var pickers = document.getElementsByClassName("picker");
-		Array.map(pickers, function(picker){
-			picker.addEventListener("click", function(){
-				Board.init(parseInt(picker.innerHTML));
-			});
 		});
+
+		var pickers = document.getElementsByClassName( "picker" );
+		// Array.map(pickers, function(picker){
+		// 	picker.addEventListener("click", function(){
+		// 		Board.init(parseInt(picker.innerHTML));
+		// 	});
+		// });
+		for( var c = 0; c < pickers.length; ++c ){
+			(function() {
+				var number = parseInt( pickers[c].innerHTML );
+				pickers[c].addEventListener( "click", function(){
+					Board.init( number );
+					console.log(number);
+				});
+			})();
+		}
 
 	</script>
 </body>
